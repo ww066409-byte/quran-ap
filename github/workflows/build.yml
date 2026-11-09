@@ -1,0 +1,46 @@
+name: Build Quran APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ۱. دریافت سورس‌کد از مخزن
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # ۲. نصب محیط جاوا (برای اندروید ضروری است)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # ۳. نصب فلاتر
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      # ۴. دریافت پکیج‌ها و وابستگی‌ها
+      - name: Install dependencies
+        uses: subosito/flutter-action@v2
+      - run: flutter pub get
+
+      # ۵. ساخت فایل APK بصورت Release
+      - name: Build APK
+        run: flutter build apk --release
+
+      # ۶. ذخیره فایل APK به عنوان خروجی (Artifact) برای دانلود
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
